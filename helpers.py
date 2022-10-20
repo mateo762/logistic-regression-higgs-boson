@@ -1,13 +1,18 @@
 import numpy as np
+import csv
 
 
 def load_data():
     """Load data and convert it to the metric system."""
-    path_dataset = "data/sample-submission.csv"
-    data = np.genfromtxt(
-        path_dataset, delimiter=",", skip_header=1, usecols=[1, 2])
-    id_ = data[:, 0]
-    prediction = data[:, 1]
+    file = open('data/sample-submission.csv')
+    csvreader = csv.reader(file)
+    header = []
+    header = next(csvreader)
+    rows = []
+    for row in csvreader:
+        rows.append(row)
+    rows
+    file.close()
    
-    return id_, prediction
+    return rows
 
