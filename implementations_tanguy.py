@@ -1,3 +1,6 @@
+import numpy as np
+
+
 
 ''' LINEAR REGRESSION USING GRADIENT DESCENT'''
 #############################################
@@ -13,6 +16,7 @@ def compute_loss_mse(y, tx, w):
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
+    N = len(y)
     error = y - (tx@w)
     mse = (1/(2*N)) * (error.T @ error)
     
@@ -161,7 +165,7 @@ def least_squares(y, tx):
     
     #inverse_g = np.linalg.inv(gramMatrix)
     w = gram_inverse @ (tx.T @ y)
-    error = y - (tx @ weights)
+    error = y - (tx @ w)
     N = len(y)
     
     loss = compute_loss_mse(y, tx, w) 
@@ -359,10 +363,6 @@ def logistic_regression_loss_gradient_hessian(y, tx, w):
            [0.3861498 , 0.62182124, 0.85749269],
            [0.48268724, 0.85749269, 1.23229813]]))
     """
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # return loss, gradient, and Hessian: TODO
-    # ***************************************************
         
     loss = calculate_logistic_loss(y, tx, w)
     
@@ -407,6 +407,40 @@ def learning_by_newton_method(y, tx, w, gamma):
     return loss, w    
 
 
+def learning_by_logistic_gradient_descent(y, tx, w, gamma):
+    """
+    Do one step of gradient descent using logistic regression. Return the loss and the updated w.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1) 
+        gamma: float
+
+    Returns:
+        loss: scalar number
+        w: shape=(D, 1) 
+
+    >>> y = np.c_[[0., 1.]]
+    >>> tx = np.arange(6).reshape(2, 3)
+    >>> w = np.array([[0.1], [0.2], [0.3]])
+    >>> gamma = 0.1
+    >>> loss, w = learning_by_gradient_descent(y, tx, w, gamma)
+    >>> round(loss, 8)
+    0.62137268
+    >>> w
+    array([[0.11037076],
+           [0.17932896],
+           [0.24828716]])
+    """
+
+    loss = compute_loss_mse(y, tx, w)
+    gradient = calculate_logistic_gradient(y, tx, w)
+    
+    new_w = w - gamma*gradient
+    return loss, new_w
+
+
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     threshold = 1e-8
     losses = []
@@ -415,7 +449,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     # start the logistic regression
     for iter in range(max_iters):
         # get loss and update w.
-        loss, w = learning_by_newton_method(y, tx, w, gamma)
+        #loss, w = learning_by_newton_method(y, tx, w, gamma)
+        loss, w = learning_by_logistic_gradient_descent(y, tx, w, gamma)
         # log info
         #if iter % 1 == 0:
          #   print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
