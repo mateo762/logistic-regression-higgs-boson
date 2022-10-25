@@ -187,7 +187,7 @@ def compute_loss_ridge(y, tx, w,lambda_):
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
-    loss = compute_loss_mse(y, tw, w) + lambda_* (w.T @ w)
+    loss = compute_loss_mse(y, tx, w) + lambda_* (w.T @ w)
     return loss
 
 def ridge_regression(y, tx, lambda_):
