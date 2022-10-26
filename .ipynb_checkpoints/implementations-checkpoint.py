@@ -4,6 +4,26 @@ import random
 
 ''' LINEAR REGRESSION USING GRADIENT DESCENT'''
 #############################################
+def calculate_mse(e):
+    """Calculate the mse for vector e."""
+    return 1 / 2 * np.mean(e ** 2)
+
+
+def compute_loss(y, tx, w):
+    """Calculate the loss using MSE.
+
+    Args:
+        y: shape=(N, )
+        tx: shape=(N,2)
+        w: shape=(2,). The vector of model parameters.
+
+    Returns:
+        the value of the loss (a scalar), corresponding to the input parameters w.
+    """
+    e = y - tx.dot(w)
+    return calculate_mse(e)
+
+
 def compute_loss_mse(y, tx, w):
 
     """Calculate the loss using either MSE or MAE.
@@ -81,59 +101,82 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
 
 def compute_stoch_gradient(y, tx, w):
     """Compute a stochastic gradient at w from just few examples n and their corresponding y_n labels.
-
+        
     Args:
-        y: shape=(N, )
-        tx: shape=(N,2)
-        w: shape=(2, ). The vector of model parameters.
-
+        y: numpy array of shape=(N, )
+        tx: numpy array of shape=(N,2)
+        w: numpy array of shape=(2, ). The vector of model parameters.
+        
     Returns:
-        An array of shape (2, ) (same shape as w), containing the stochastic gradient of the loss at w.
+        A numpy array of shape (2, ) (same shape as w), containing the stochastic gradient of the loss at w.
     """
-
+    
     err = y - tx.dot(w)
-    err = np.squeeze(np.asarray(err))
-    tx = np.squeeze(np.asarray(tx))
-    grad = -tx.T.dot(err)
+    grad = -tx.T.dot(err) / len(err)
     return grad, err
 
+def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
+    """
+    Generate a minibatch iterator for a dataset.
+    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
+    Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
+    Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
+    Example of use :
+    for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
+        <DO-SOMETHING>
+    """
+    data_size = len(y)
 
-def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
+    if shuffle:
+        shuffle_indices = np.random.permutation(np.arange(data_size))
+        shuffled_y = y[shuffle_indices]
+        shuffled_tx = tx[shuffle_indices]
+    else:
+        shuffled_y = y
+        shuffled_tx = tx
+    for batch_num in range(num_batches):
+        start_index = batch_num * batch_size
+        end_index = min((batch_num + 1) * batch_size, data_size)
+        if start_index != end_index:
+            yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+
+def mean_squared_error_sgd(y, tx, initial_w, batch_size, max_iters, gamma):
     """The Stochastic Gradient Descent algorithm (SGD).
-
+            
     Args:
-        y: shape=(N, )
-        tx: shape=(N,2)
-        initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
+        y: numpy array of shape=(N, )
+        tx: numpy array of shape=(N,2)
+        initial_w: numpy array of shape=(2, ). The initial guess (or the initialization) for the model parameters
+        batch_size: a scalar denoting the number of data points in a mini-batch used for computing the stochastic gradient
         max_iters: a scalar denoting the total number of iterations of SGD
         gamma: a scalar denoting the stepsize
-
-    Returns:
-        w: a scalar denoting the model parameters as numpy arrays of shape (2), for the last iteration of SGD
-        loss: a scalar denoting the loss value for the last iteration of SGD
-    """
-
-    # Define parameters
-    w = initial_w
-    losses = []
-
-    for n_iter in range(max_iters):
         
-        rand_idx = int(random.random() * len(y))
-        y_stoch=y[rand_idx]
-        tx_stoch=tx[rand_idx,:]
-        # compute a stochastic gradient and loss
-        grad, _ = compute_stoch_gradient(y_stoch, tx_stoch, w)
-        # update w through the stochastic gradient update
-        w = w - gamma * grad
-        # calculate loss
-        loss = compute_loss_mse(y_stoch, tx_stoch, w)
-        losses.append(loss)
+    Returns:
+        losses: a list of length max_iters containing the loss value (scalar) for each iteration of SGD
+        ws: a list of length max_iters containing the model parameters as numpy arrays of shape (2, ), for each iteration of SGD 
+    """
     
+    # Define parameters to store w and loss
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+    
+    for n_iter in range(max_iters):
+        for y_batch, tx_batch in batch_iter(y, tx, batch_size=batch_size, num_batches=1):
+            # compute a stochastic gradient and loss
+            grad, _ = compute_stoch_gradient(y_batch, tx_batch, w)
+            # update w through the stochastic gradient update
+            w = w - gamma * grad
+            # calculate loss
+            loss = compute_loss(y, tx, w)
+            # store w and loss
+            ws.append(w)
+            losses.append(loss)
+        
 
         #print("SGD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
-            #bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
-    return w,loss
+              #bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+    return ws, loss
 
 
 
