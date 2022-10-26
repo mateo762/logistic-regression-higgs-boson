@@ -463,3 +463,67 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     #visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     #print("loss={l}".format(l=calculate_loss(y, tx, w)))    
     return (w, loss)
+
+def learning_by_penalized_logistic_gradient_descent(y, tx, w, lambda_, gamma):
+    """return the loss and gradient.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+        lambda_: scalar
+
+    Returns:
+        loss: scalar number
+        new_w: shape=(D, 1)
+
+    """
+   
+    loss = compute_loss_mse(y, tx, w)+lambda_*np.dot(w.T,w)
+    gradient = calculate_logistic_gradient(y, tx, w)+2*lambda_*w
+
+    
+    
+    new_w = w - gamma*gradient
+    return loss, new_w
+
+
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """
+    Do steps of gradient descent until the difference between the losses is below threshold, using the penalized logistic regression.
+    Return the final loss and w.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        lambda_: scalar
+        initial_w:  shape=(D, 1)
+        max_iters: scalar
+        gamma: scalar
+
+    Returns:
+        loss: scalar number
+        w: shape=(D, 1)
+
+    """
+    threshold = 1e-8
+    losses = []
+    w = initial_w
+
+    # start the logistic regression
+    for iter in range(max_iters):
+        # get loss and update w.
+        #loss, w = learning_by_newton_method(y, tx, w, gamma)
+        loss, w = learning_by_penalized_logistic_gradient_descent(y, tx, w, lambda_, gamma)
+        # log info
+        #if iter % 1 == 0:
+         #   print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
+
+        # converge criterion
+        losses.append(loss)
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            break
+    # visualization
+    #visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
+    #print("loss={l}".format(l=calculate_loss(y, tx, w)))    
+    return (w, loss)
