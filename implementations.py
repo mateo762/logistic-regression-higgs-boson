@@ -190,13 +190,14 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
         #tx_stoch, y_stoch = create_batch_size_1(y, tx, N)
 
         #loss = compute_loss_mse(y_stoch, tx_stoch, w)
-        loss = compute_loss_mse(y, tx, w)
 
         # compute a stochastic gradient and loss
-        grad, _ = compute_stoch_gradient(y, tx, w)
+        grad = compute_gradient(y, tx, w)
         # , _ = compute_stoch_gradient(y_stoch, tx_stoch, w)
         # update w through the stochastic gradient update
         w = w - gamma * grad
+        loss = compute_loss_mse(y, tx, w)
+
         # calculate loss
 
         # print("SGD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
@@ -282,7 +283,7 @@ def ridge_regression(y, tx, lambda_):
 
     w = (np.linalg.inv(gram_m + lambda_identity)) @ (tx.T @ y)
 
-    loss = compute_loss_mse(y, tx, w, lambda_)#compute_loss_ridge(y, tx, w, lambda_)
+    loss = compute_loss_mse(y, tx, w)#compute_loss_ridge(y, tx, w, lambda_)
 
     return w, loss
 
