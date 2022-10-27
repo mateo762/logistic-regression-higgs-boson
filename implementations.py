@@ -93,7 +93,7 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         # print("GD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
         #     bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
 
-    return (w, loss)
+    return w, loss
 
 
 """ LINEAR REGRESSION USING STOCHASTIC GRADIENT DESCENT"""
@@ -143,7 +143,7 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 
-def mean_squared_error_sgd(y, tx, initial_w, batch_size, max_iters, gamma):
+def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     """The Stochastic Gradient Descent algorithm (SGD).
 
     Args:
@@ -502,7 +502,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
-    return (w, loss)
+    return w, loss
 
 
 def learning_by_penalized_logistic_gradient_descent(y, tx, w, lambda_, gamma):
@@ -567,4 +567,4 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
-    return (w, loss)
+    return w, loss
