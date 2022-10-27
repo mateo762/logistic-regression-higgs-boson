@@ -166,6 +166,7 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     losses = []
     w = initial_w
     loss = 0.0
+    N = y.shape[0]
     for n_iter in range(max_iters):
 
         rand_idx = int(random.random() * N)
@@ -237,7 +238,7 @@ def compute_loss_ridge(y, tx, w, lambda_):
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
-    loss = compute_loss_mse(y, tx, w) + lambda_ * (w.T @ w)
+    loss = compute_loss_mse(y, tx, w) + (lambda_ * (w.T @ w))[0][0]
     return loss
 
 
@@ -480,7 +481,7 @@ def learning_by_logistic_gradient_descent(y, tx, w, gamma):
            [0.24828716]])
     """
 
-    loss = compute_loss_mse(y, tx, w)
+    loss = calculate_logistic_loss(y, tx, w)
     gradient = calculate_logistic_gradient(y, tx, w)
 
     new_w = w - gamma * gradient
@@ -488,10 +489,10 @@ def learning_by_logistic_gradient_descent(y, tx, w, gamma):
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    threshold = 1e-8
+    #threshold = 1e-8
     losses = []
     w = initial_w
-    loss= 0.0
+    loss = 0.0
 
     # start the logistic regression
     for iter in range(max_iters):
@@ -504,8 +505,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
         # converge criterion
         losses.append(loss)
-        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-            break
+        #if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+         #   break
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
@@ -527,7 +528,7 @@ def learning_by_penalized_logistic_gradient_descent(y, tx, w, lambda_, gamma):
 
     """
 
-    loss = compute_loss_mse(y, tx, w) + lambda_ * np.dot(w.T, w)
+    loss = calculate_logistic_loss(y, tx, w) + (lambda_ * np.dot(w.T, w))[0][0]
     gradient = calculate_logistic_gradient(y, tx, w) + 2 * lambda_ * w
 
     new_w = w - gamma * gradient
