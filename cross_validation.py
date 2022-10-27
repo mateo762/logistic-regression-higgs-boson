@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 from implementations_tanguy import *
 
 
+
+
+
+
 def cross_validation_visualization(lambds, rmse_tr, rmse_te):
     """visualization the curves of rmse_tr and rmse_te."""
     plt.semilogx(lambds, rmse_tr, marker=".", color='b', label='train error')
@@ -39,23 +43,8 @@ def build_k_indices(y, k_fold, seed):
     return np.array(k_indices)
 
 
-def cross_validation_least_squares(y, x, k_indices, k):
-    """return the loss of ridge regression for a fold corresponding to k_indices
-    
-    Args:
-        y:          shape=(N,)
-        x:          shape=(N,)
-        k_indices:  2D array returned by build_k_indices()
-        k:          scalar, the k-th fold (N.B.: not to confused with k_fold which is the fold nums)
-        lambda_:    scalar, cf. ridge_regression()
-        degree:     scalar, cf. build_poly()
-
-    Returns:
-        train and test root mean square errors rmse = sqrt(2 mse)
-
-    >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
-    (0.019866645527597114, 0.33555914361295175)
-    """
+def separate_data(x, y, k_indices,k):
+	#separates data between train and test sets using k folds and k indices
     test_indices = k_indices[k]
 
     train_indices_not_flat = []
@@ -78,6 +67,27 @@ def cross_validation_least_squares(y, x, k_indices, k):
     train_tx = np.c_[np.ones((len(train_y), 1)), train_x]
 
     test_tx = np.c_[np.ones((len(test_y), 1)), test_x]
+    return train_tx, train_y, test_tx, test_y
+
+def cross_validation_least_squares(y, x, k_indices, k):
+    """return the loss of ridge regression for a fold corresponding to k_indices
+    
+    Args:
+        y:          shape=(N,)
+        x:          shape=(N,)
+        k_indices:  2D array returned by build_k_indices()
+        k:          scalar, the k-th fold (N.B.: not to confused with k_fold which is the fold nums)
+        lambda_:    scalar, cf. ridge_regression()
+        degree:     scalar, cf. build_poly()
+
+    Returns:
+        train and test root mean square errors rmse = sqrt(2 mse)
+
+    >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
+    (0.019866645527597114, 0.33555914361295175)
+    """
+    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices,k)
+
 
 
     w, loss_tr = least_squares(train_y, train_tx)
@@ -111,31 +121,10 @@ def cross_validation_linear_gd(y, x, k_indices,k):
     >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
     (0.019866645527597114, 0.33555914361295175)
     """
-    test_indices = k_indices[k]
-
-    train_indices_not_flat = []
-
-    # add all groups of indices in the list
-    for i in range(len(k_indices)):
-        if i != k: 
-            train_indices_not_flat.append(k_indices[i])
-    #flatten the indices
-    train_indices_flat = [e for sl in train_indices_not_flat for e in sl]
-
-    test_x = [x[i] for i in test_indices]    
-
-    test_y = [y[i] for i in test_indices]    
-
-    train_x = [x[i] for i in train_indices_flat]
-
-    train_y = [y[i] for i in train_indices_flat]
-
-    train_tx = np.c_[np.ones((len(train_y), 1)), train_x]
-
-    test_tx = np.c_[np.ones((len(test_y), 1)), test_x]
+    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices,k)
 
 
-    w, loss_tr = mean_squared_error_gd(train_y, train_tx, np.zeros((train_tx.shape[1], 1)), 100000, 0.00001)
+    w, loss_tr = mean_squared_error_gd(train_y, train_tx, np.zeros((train_tx.shape[1], 1)), 10000, 0.00001)
     
     #rr_test = ridge_regression(test_y, poly_test, lambda_)
  
@@ -169,31 +158,9 @@ def cross_validation_logistic_regression(y, x, k_indices,k):
     >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
     (0.019866645527597114, 0.33555914361295175)
     """
-    test_indices = k_indices[k]
+    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices,k)
 
-    train_indices_not_flat = []
-
-    # add all groups of indices in the list
-    for i in range(len(k_indices)):
-        if i != k: 
-            train_indices_not_flat.append(k_indices[i])
-    #flatten the indices
-    train_indices_flat = [e for sl in train_indices_not_flat for e in sl]
-
-    test_x = [x[i] for i in test_indices]    
-
-    test_y = [y[i] for i in test_indices]    
-
-    train_x = [x[i] for i in train_indices_flat]
-
-    train_y = [y[i] for i in train_indices_flat]
-
-    train_tx = np.c_[np.ones((len(train_y), 1)), train_x]
-
-    test_tx = np.c_[np.ones((len(test_y), 1)), test_x]
-
-
-    w, loss_tr = logistic_regression(train_y, train_tx, np.zeros((train_tx.shape[1], 1)), 100000, 0.00001)
+    w, loss_tr = logistic_regression(train_y, train_tx, np.zeros((train_tx.shape[1], 1)), 10000, 0.00001)
     
     #rr_test = ridge_regression(test_y, poly_test, lambda_)
 
@@ -226,28 +193,8 @@ def cross_validation_ridge_regression(y, x, k_indices, k, lambda_):
     (0.019866645527597114, 0.33555914361295175)
     """
     
-    test_indices = k_indices[k]
-    
-    train_indices_not_flat = []
-    
-    for i in range(len(k_indices)):
-        if i != k: 
-            train_indices_not_flat.append(k_indices[i])
-    
-    train_indices_flat = [e for sl in train_indices_not_flat for e in sl]
-
-
-    test_x = [x[i] for i in test_indices]    
-    
-    test_y = [y[i] for i in test_indices]    
-    
-    train_x = [x[i] for i in train_indices_flat]
-    
-    train_y = [y[i] for i in train_indices_flat]
- 
-    train_tx = np.c_[np.ones((len(train_y), 1)), train_x]
-
-    test_tx = np.c_[np.ones((len(test_y), 1)), test_x]   
+    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices,k)
+  
     
     w, loss_tr = ridge_regression(train_y, train_tx, lambda_)
             
@@ -303,6 +250,9 @@ def find_best_lambda_ridge_regression(x, y, k_fold, lambdas):
     print(" the choice of lambda which leads to the best test rmse is %.5f with a test rmse of %.3f" % (best_lambda, best_rmse))
     return best_lambda, best_rmse
 
+
+
+
 def cross_validation_reg_logistic_regression(y, x, k_indices,k,lambda_):
     """return the loss of ridge regression for a fold corresponding to k_indices
     
@@ -320,36 +270,15 @@ def cross_validation_reg_logistic_regression(y, x, k_indices,k,lambda_):
     >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
     (0.019866645527597114, 0.33555914361295175)
     """
-    test_indices = k_indices[k]
-
-    train_indices_not_flat = []
-
-    # add all groups of indices in the list
-    for i in range(len(k_indices)):
-        if i != k: 
-            train_indices_not_flat.append(k_indices[i])
-    #flatten the indices
-    train_indices_flat = [e for sl in train_indices_not_flat for e in sl]
-
-    test_x = [x[i] for i in test_indices]    
-
-    test_y = [y[i] for i in test_indices]    
-
-    train_x = [x[i] for i in train_indices_flat]
-
-    train_y = [y[i] for i in train_indices_flat]
-
-    train_tx = np.c_[np.ones((len(train_y), 1)), train_x]
-
-    test_tx = np.c_[np.ones((len(test_y), 1)), test_x]
+    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices,k)
 
 
-    w, loss_tr = reg_logistic_regression(train_y, train_tx, lambda_,np.zeros((train_tx.shape[1], 1)), 100000, 0.00001)
+    w, loss_tr = reg_logistic_regression(train_y, train_tx, lambda_,np.zeros((train_tx.shape[1], 1)), 10000, 0.00001)
     
     #rr_test = ridge_regression(test_y, poly_test, lambda_)
 
  
-    loss_te = compute_loss_mse(test_y, test_tx, w) + lambda_*np.dot(w.T,w)
+    loss_te = compute_loss_mse(test_y, test_tx, w) + lambda_* np.dot(w.T,w)
 
     loss_tr = np.sqrt(2*loss_tr) + lambda_*np.dot(w.T,w)
 
