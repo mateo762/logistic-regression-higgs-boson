@@ -357,6 +357,7 @@ def cross_validation_reg_logistic_regression(y, x, k_indices,k,lambda_):
 
     return loss_tr, loss_te
 
+
 def find_best_lambda_reg_logistic_regression(x, y, k_fold, lambdas):
     """cross validation over regularisation parameter lambda.
     
