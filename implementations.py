@@ -81,6 +81,8 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     ws = [initial_w]
     losses = []
     w = initial_w
+    loss = 0.0
+
     for n_iter in range(max_iters):
 
         gradient = compute_gradient(y, tx, w)
@@ -93,7 +95,7 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         # print("GD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
         #     bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
 
-    return w, loss
+    return (w, loss)
 
 
 """ LINEAR REGRESSION USING STOCHASTIC GRADIENT DESCENT"""
@@ -485,6 +487,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     threshold = 1e-8
     losses = []
     w = initial_w
+    loss= 0.0
 
     # start the logistic regression
     for iter in range(max_iters):
@@ -502,7 +505,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
-    return w, loss
+    return (w, loss)
 
 
 def learning_by_penalized_logistic_gradient_descent(y, tx, w, lambda_, gamma):
@@ -548,7 +551,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     threshold = 1e-8
     losses = []
     w = initial_w
-
+    loss= 0.0
     # start the logistic regression
     for iter in range(max_iters):
         # get loss and update w.
@@ -567,4 +570,4 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
-    return w, loss
+    return (w, loss)
