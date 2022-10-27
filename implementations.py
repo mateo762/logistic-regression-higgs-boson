@@ -86,14 +86,13 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     for n_iter in range(max_iters):
 
         gradient = compute_gradient(y, tx, w)
-        
 
         w = w - gamma * gradient
 
         loss = compute_loss_mse(y, tx, w)
         # store w and loss
         ws.append(w)
-        losses.append(loss)        
+        losses.append(loss)
 
         # print("GD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
         #     bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
@@ -148,6 +147,20 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 
+def create_batch_size_1(y, tx, N):
+    rand_idx = int(random.random() * N)
+    # take a y and put this value in a matrix
+    y_stoch = [
+        y[rand_idx],
+    ]
+    y_stoch = np.expand_dims(y_stoch, axis=1)
+
+    # take a random sample features in the appropriate matrix form
+    tx_stoch = np.reshape(tx[rand_idx, :], (1, tx.shape[1]))
+
+    return tx_stoch, y_stoch
+
+
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     """The Stochastic Gradient Descent algorithm (SGD).
 
@@ -168,27 +181,14 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     ws = [initial_w]
     losses = []
     w = initial_w
-
-    rand_idx = int(random.random() * N)
-    # take a y and put this value in a matrix
-    y_stoch = [y[rand_idx],]
-    y_stoch = np.expand_dims(y_stoch, axis=1)
-
-    # take a random sample features in the appropriate matrix form
-    tx_stoch = np.reshape(tx[rand_idx, :], (1, tx.shape[1]))
+    N = y.shape[0]
+    tx_stoch, y_stoch = create_batch_size_1(y, tx, N)
 
     loss = compute_loss_mse(y_stoch, tx_stoch, w)
-    N = y.shape[0]
     for n_iter in range(max_iters):
 
-        rand_idx = int(random.random() * N)
-        # take a y and put this value in a matrix
-        y_stoch = [y[rand_idx],]
-        y_stoch = np.expand_dims(y_stoch, axis=1)
+        tx_stoch, y_stoch = create_batch_size_1(y, tx, N)
 
-        # take a random sample features in the appropriate matrix form
-        tx_stoch = np.reshape(tx[rand_idx, :], (1, tx.shape[1]))
-        
         loss = compute_loss_mse(y_stoch, tx_stoch, w)
 
         # compute a stochastic gradient and loss
@@ -272,6 +272,7 @@ def ridge_regression(y, tx, lambda_):
     array([0.03947092, 0.00319628])
 
     """
+
     N = len(y)
 
     gram_m = tx.T @ tx
@@ -282,7 +283,7 @@ def ridge_regression(y, tx, lambda_):
 
     loss = compute_loss_ridge(y, tx, w, lambda_)
 
-    return (w, loss)
+    return w, np.sqrt(2 * loss)
 
 
 """ Logistic regression using gradient descent or SGD (y ∈ {0, 1}) """
@@ -494,16 +495,16 @@ def learning_by_logistic_gradient_descent(y, tx, w, gamma):
            [0.24828716]])
     """
 
-    #loss = calculate_logistic_loss(y, tx, w)
+    # loss = calculate_logistic_loss(y, tx, w)
     gradient = calculate_logistic_gradient(y, tx, w)
 
     new_w = w - gamma * gradient
-    #return loss, new_w
+    # return loss, new_w
     return new_w
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    #threshold = 1e-8
+    # threshold = 1e-8
     losses = []
 
     w = initial_w
@@ -511,25 +512,21 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     # start the logistic regression
     for iter in range(max_iters):
 
-
-
         # get loss and update w.
         # loss, w = learning_by_newton_method(y, tx, w, gamma)
 
         w = learning_by_logistic_gradient_descent(y, tx, w, gamma)
 
-
         loss = calculate_logistic_loss(y, tx, w)
         losses.append(loss)
-
 
         # log info
         # if iter % 1 == 0:
         #   print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
 
         # converge criterion
-        #if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-         #   break
+        # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+        #   break
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
@@ -551,11 +548,15 @@ def learning_by_penalized_logistic_gradient_descent(y, tx, w, lambda_, gamma):
 
     """
 
+    # + #((lambda_) * np.dot(w.T, w))[0][0]
+
     gradient = calculate_logistic_gradient(y, tx, w) + 2 * lambda_ * w
 
     new_w = w - gamma * gradient
-
-    loss = calculate_logistic_loss(y, tx, new_w) + (lambda_ * np.dot(new_w.T, new_w))[0][0]
+    loss = (
+        calculate_logistic_loss(y, tx, new_w)
+        + ((lambda_) * np.dot(new_w.T, new_w))[0][0]
+    )
 
     return loss, new_w
 
@@ -578,15 +579,18 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         w: shape=(D, 1)
 
     """
-    #threshold = 1e-8
+    # threshold = 1e-8
     losses = []
     w = initial_w
-    loss= calculate_logistic_loss(y, tx, initial_w) + (lambda_ * np.dot(initial_w.T, initial_w))[0][0]
-    #if(max_iters == 0):
-   	#	loss = calculate_logistic_loss(y, tx, w) + (lambda_ * np.dot(w.T, w))[0][0]
+    loss = (
+        calculate_logistic_loss(y, tx, initial_w)
+        + ((lambda_) * np.dot(initial_w.T, initial_w))[0][0]
+    )
+    # if(max_iters == 0):
+    # 	loss = calculate_logistic_loss(y, tx, w) + (lambda_ * np.dot(w.T, w))[0][0]
     # start the logistic regression
     for iter in range(max_iters):
-    	#loss = calculate_logistic_loss(y, tx, w)
+        # loss = calculate_logistic_loss(y, tx, w)
 
         # get loss and update w.
         # loss, w = learning_by_newton_method(y, tx, w, gamma)
@@ -598,10 +602,10 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         #   print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
 
         # converge criterion
-        #losses.append(loss)
-        #if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-         #   break
+        # losses.append(loss)
+        # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+        #   break
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
-    return (w, loss)
+    return (w, loss - ((lambda_) * np.dot(w.T, w))[0][0])
