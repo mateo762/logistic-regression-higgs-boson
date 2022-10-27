@@ -40,7 +40,7 @@ def compute_loss_mse(y, tx, w):
     error = y - (tx @ w)
     mse = (1 / (2 * N)) * (error.T @ error)
 
-    return mse
+    return mse[0][0]
 
 
 def compute_gradient(y, tx, w):
@@ -165,20 +165,24 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     ws = [initial_w]
     losses = []
     w = initial_w
-
+    loss = 0.0
     for n_iter in range(max_iters):
-        for y_batch, tx_batch in batch_iter(
-            y, tx, batch_size=batch_size, num_batches=1
-        ):
-            # compute a stochastic gradient and loss
-            grad, _ = compute_stoch_gradient(y_batch, tx_batch, w)
-            # update w through the stochastic gradient update
-            w = w - gamma * grad
-            # calculate loss
-            loss = compute_loss(y, tx, w)
-            # store w and loss
-            ws.append(w)
-            losses.append(loss)
+
+        rand_idx = int(random.random() * N)
+        # take a y and put this value in a matrix
+        y_stoch = [y[rand_idx],]
+        y_stoch = np.expand_dims(y_stoch, axis=1)
+
+        # take a random sample features in the appropriate matrix form
+        tx_stoch = np.reshape(tx[rand_idx, :], (1, tx.shape[1]))
+
+        # compute a stochastic gradient and loss
+        grad = compute_stoch_gradient(y_stoch, tx_stoch, w)
+        # , _ = compute_stoch_gradient(y_stoch, tx_stoch, w)
+        # update w through the stochastic gradient update
+        w = w - gamma * grad
+        # calculate loss
+        loss = compute_loss_mse(y_stoch, tx_stoch, w)
 
         # print("SGD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
         # bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
