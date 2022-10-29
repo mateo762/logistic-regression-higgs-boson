@@ -327,9 +327,11 @@ def calculate_logistic_loss(y, tx, w):
     >>> round(calculate_loss(y, tx, w), 8)
     1.52429481
     """
-    assert y.shape[0] == tx.shape[0]
-    assert tx.shape[1] == w.shape[0]
+    #assert y.shape[0] == tx.shape[0]
+    #assert tx.shape[1] == w.shape[0]
 
+    #print(tx.shape)
+    #print(w.shape)
     N = len(y)
 
     result = 0.0
@@ -337,6 +339,7 @@ def calculate_logistic_loss(y, tx, w):
         temp_prob = sigmoid(tx[i].T @ w)
         result += y[i] * np.log(temp_prob) + (1 - y[i]) * np.log(1 - temp_prob)
     loss = -(1 / N) * result[0]
+
     return loss
 
 
@@ -506,7 +509,7 @@ def learning_by_logistic_gradient_descent(y, tx, w, gamma):
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    # threshold = 1e-8
+    threshold = 1e-5
     losses = []
 
     w = initial_w
@@ -527,8 +530,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         #   print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
 
         # converge criterion
-        # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-        #   break
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+           break
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
@@ -581,13 +584,10 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         w: shape=(D, 1)
 
     """
-    # threshold = 1e-8
+    threshold = 1e-5
     losses = []
     w = initial_w
-    loss = (
-        calculate_logistic_loss(y, tx, initial_w)
-        + ((lambda_) * np.dot(initial_w.T, initial_w))[0][0]
-    )
+    loss = ( calculate_logistic_loss(y, tx, initial_w) + ((lambda_) * np.dot(initial_w.T, initial_w))[0][0])
     # if(max_iters == 0):
     # 	loss = calculate_logistic_loss(y, tx, w) + (lambda_ * np.dot(w.T, w))[0][0]
     # start the logistic regression

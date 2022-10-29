@@ -1,7 +1,7 @@
 import numpy as np
 from helpers import *
 import matplotlib.pyplot as plt
-from implementations_tanguy import *
+from implementations import *
 
 
 def cross_validation_visualization(lambds, rmse_tr, rmse_te):
@@ -40,7 +40,7 @@ def build_k_indices(y, k_fold, seed):
     return np.array(k_indices)
 
 
-def separate_data(x, y, k_indices, k):
+def separate_data(tx, y, k_indices, k):
     # separates data between train and test sets using k folds and k indices
     test_indices = k_indices[k]
 
@@ -53,21 +53,18 @@ def separate_data(x, y, k_indices, k):
     # flatten the indices
     train_indices_flat = [e for sl in train_indices_not_flat for e in sl]
 
-    test_x = [x[i] for i in test_indices]
+    test_tx = np.array([tx[i] for i in test_indices])
 
     test_y = [y[i] for i in test_indices]
 
-    train_x = [x[i] for i in train_indices_flat]
+    train_tx = np.array([tx[i] for i in train_indices_flat])
 
     train_y = [y[i] for i in train_indices_flat]
 
-    train_tx = np.c_[np.ones((len(train_y), 1)), train_x]
-
-    test_tx = np.c_[np.ones((len(test_y), 1)), test_x]
     return train_tx, train_y, test_tx, test_y
 
 
-def cross_validation_least_squares(y, x, k_indices, k):
+def cross_validation_least_squares(y, tx, k_indices, k):
     """return the loss of ridge regression for a fold corresponding to k_indices
 
     Args:
@@ -84,7 +81,7 @@ def cross_validation_least_squares(y, x, k_indices, k):
     >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
     (0.019866645527597114, 0.33555914361295175)
     """
-    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices, k)
+    train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
 
     w, loss_tr = least_squares(train_y, train_tx)
 
@@ -99,7 +96,7 @@ def cross_validation_least_squares(y, x, k_indices, k):
     return loss_tr, loss_te
 
 
-def cross_validation_linear_gd(y, x, k_indices, k):
+def cross_validation_linear_gd(y, tx, k_indices, k):
     """return the loss of ridge regression for a fold corresponding to k_indices
 
     Args:
@@ -116,10 +113,10 @@ def cross_validation_linear_gd(y, x, k_indices, k):
     >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
     (0.019866645527597114, 0.33555914361295175)
     """
-    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices, k)
+    train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
 
     w, loss_tr = mean_squared_error_gd(
-        train_y, train_tx, np.zeros((train_tx.shape[1], 1)), 10000, 0.00001
+        train_y, train_tx, np.zeros((train_tx.shape[1], 1)), 10000, 0.001
     )
 
     # rr_test = ridge_regression(test_y, poly_test, lambda_)
@@ -133,7 +130,7 @@ def cross_validation_linear_gd(y, x, k_indices, k):
     return loss_tr, loss_te
 
 
-def cross_validation_logistic_regression(y, x, k_indices, k):
+def cross_validation_logistic_regression(y, tx, initial_w, k_indices, k):
     """return the loss of ridge regression for a fold corresponding to k_indices
 
     Args:
@@ -147,13 +144,16 @@ def cross_validation_logistic_regression(y, x, k_indices, k):
     Returns:
         train and test root mean square errors rmse = sqrt(2 mse)
 
-    >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
+    >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np
+    .array([[3,2], [0,1]]), 1, 2, 3)
     (0.019866645527597114, 0.33555914361295175)
     """
-    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices, k)
+    train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
+
+
 
     w, loss_tr = logistic_regression(
-        train_y, train_tx, np.zeros((train_tx.shape[1], 1)), 10000, 0.00001
+        train_y, train_tx, initial_w, 5000, 1e-6
     )
 
     # rr_test = ridge_regression(test_y, poly_test, lambda_)
@@ -167,7 +167,7 @@ def cross_validation_logistic_regression(y, x, k_indices, k):
     return loss_tr, loss_te
 
 
-def cross_validation_ridge_regression(y, x, k_indices, k, lambda_):
+def cross_validation_ridge_regression(y, tx, k_indices, k, lambda_):
     """return the loss of ridge regression for a fold corresponding to k_indices
 
     Args:
@@ -185,7 +185,7 @@ def cross_validation_ridge_regression(y, x, k_indices, k, lambda_):
     (0.019866645527597114, 0.33555914361295175)
     """
 
-    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices, k)
+    train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
 
     w, loss_tr = ridge_regression(train_y, train_tx, lambda_)
 
@@ -198,7 +198,7 @@ def cross_validation_ridge_regression(y, x, k_indices, k, lambda_):
     return loss_tr, loss_te
 
 
-def find_best_lambda_ridge_regression(x, y, k_fold, lambdas):
+def find_best_lambda_ridge_regression(tx, y, k_fold, lambdas):
     """cross validation over regularisation parameter lambda.
 
     Args:
@@ -221,7 +221,7 @@ def find_best_lambda_ridge_regression(x, y, k_fold, lambdas):
         rmse_tr_temp = 0.0
         rmse_te_temp = 0.0
         for k in range(k_fold):
-            loss_tr, loss_te = cross_validation_ridge_regression(y, x, k_indices, k, l)
+            loss_tr, loss_te = cross_validation_ridge_regression(y, tx, k_indices, k, l)
 
             rmse_tr_temp += loss_tr
             rmse_te_temp += loss_te
@@ -232,8 +232,8 @@ def find_best_lambda_ridge_regression(x, y, k_fold, lambdas):
         if rmse_te_temp < best_rmse:
             best_rmse = rmse_te_temp
             best_lambda = l
-        rmse_tr.append(rmse_tr_temp[0])
-        rmse_te.append(rmse_te_temp[0])
+        rmse_tr.append(rmse_tr_temp)
+        rmse_te.append(rmse_te_temp)
 
     cross_validation_visualization(lambdas, rmse_tr, rmse_te)
     print(
@@ -243,7 +243,7 @@ def find_best_lambda_ridge_regression(x, y, k_fold, lambdas):
     return best_lambda, best_rmse
 
 
-def cross_validation_reg_logistic_regression(y, x, k_indices, k, lambda_):
+def cross_validation_reg_logistic_regression(y, tx, initial_w, k_indices, k, lambda_):
     """return the loss of ridge regression for a fold corresponding to k_indices
 
     Args:
@@ -260,24 +260,22 @@ def cross_validation_reg_logistic_regression(y, x, k_indices, k, lambda_):
     >>> cross_validation(np.array([1.,2.,3.,4.]), np.array([6.,7.,8.,9.]), np.array([[3,2], [0,1]]), 1, 2, 3)
     (0.019866645527597114, 0.33555914361295175)
     """
-    train_tx, train_y, test_tx, test_y = separate_data(x, y, k_indices, k)
+    train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
 
-    w, loss_tr = reg_logistic_regression(
-        train_y, train_tx, lambda_, np.zeros((train_tx.shape[1], 1)), 10000, 0.00001
-    )
+    w, loss_tr = reg_logistic_regression(train_y, train_tx, lambda_, initial_w, 1000, 0.001)
 
     # rr_test = ridge_regression(test_y, poly_test, lambda_)
 
-    loss_te = compute_loss_mse(test_y, test_tx, w) + lambda_ * np.dot(w.T, w)
+    loss_te = calculate_logistic_loss(test_y, test_tx, w)# + lambda_ * np.dot(w.T, w)
 
-    loss_tr = np.sqrt(2 * loss_tr) + lambda_ * np.dot(w.T, w)
+    loss_tr = np.sqrt(2 * loss_tr)# + lambda_ * np.dot(w.T, w)
 
-    loss_te = np.sqrt(2 * loss_te) + lambda_ * np.dot(w.T, w)
+    loss_te = np.sqrt(2 * loss_te)# + lambda_ * np.dot(w.T, w)
 
     return loss_tr, loss_te
 
 
-def find_best_lambda_reg_logistic_regression(x, y, k_fold, lambdas):
+def find_best_lambda_reg_logistic_regression(tx, y, initial_w, k_fold, lambdas):
     """cross validation over regularisation parameter lambda.
 
     Args:
@@ -300,9 +298,7 @@ def find_best_lambda_reg_logistic_regression(x, y, k_fold, lambdas):
         rmse_tr_temp = 0.0
         rmse_te_temp = 0.0
         for k in range(k_fold):
-            loss_tr, loss_te = cross_validation_reg_logistic_regression(
-                y, x, k_indices, k, l
-            )
+            loss_tr, loss_te = cross_validation_reg_logistic_regression( y, tx, initial_w, k_indices, k, l)
 
             rmse_tr_temp += loss_tr
             rmse_te_temp += loss_te
@@ -313,8 +309,8 @@ def find_best_lambda_reg_logistic_regression(x, y, k_fold, lambdas):
         if rmse_te_temp < best_rmse:
             best_rmse = rmse_te_temp
             best_lambda = l
-        rmse_tr.append(rmse_tr_temp[0])
-        rmse_te.append(rmse_te_temp[0])
+        rmse_tr.append(rmse_tr_temp)
+        rmse_te.append(rmse_te_temp)
 
     cross_validation_visualization(lambdas, rmse_tr, rmse_te)
     print(
