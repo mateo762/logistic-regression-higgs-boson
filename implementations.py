@@ -327,18 +327,15 @@ def calculate_logistic_loss(y, tx, w):
     >>> round(calculate_loss(y, tx, w), 8)
     1.52429481
     """
-    #assert y.shape[0] == tx.shape[0]
-    #assert tx.shape[1] == w.shape[0]
+    assert y.shape[0] == tx.shape[0]
+    assert tx.shape[1] == w.shape[0]
 
     #print(tx.shape)
     #print(w.shape)
     N = len(y)
 
-    result = 0.0
-    for i in range(N):
-        temp_prob = sigmoid(tx[i].T @ w)
-        result += y[i] * np.log(temp_prob) + (1 - y[i]) * np.log(1 - temp_prob)
-    loss = -(1 / N) * result[0]
+    sigm = sigmoid(np.dot(tx,w))
+    loss = -1/N*np.sum(y*np.log(sigm)+(1-y)*np.log(1-sigm))
 
     return loss
 

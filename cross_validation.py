@@ -55,11 +55,11 @@ def separate_data(tx, y, k_indices, k):
 
     test_tx = np.array([tx[i] for i in test_indices])
 
-    test_y = [y[i] for i in test_indices]
+    test_y = np.array([y[i] for i in test_indices])
 
     train_tx = np.array([tx[i] for i in train_indices_flat])
 
-    train_y = [y[i] for i in train_indices_flat]
+    train_y = np.array([y[i] for i in train_indices_flat])
 
     return train_tx, train_y, test_tx, test_y
 
@@ -262,7 +262,7 @@ def cross_validation_reg_logistic_regression(y, tx, initial_w, k_indices, k, lam
     """
     train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
 
-    w, loss_tr = reg_logistic_regression(train_y, train_tx, lambda_, initial_w, 1000, 0.001)
+    w, loss_tr = reg_logistic_regression(train_y, train_tx, lambda_, initial_w, 1000, 0.0001)
 
     # rr_test = ridge_regression(test_y, poly_test, lambda_)
 
@@ -314,7 +314,7 @@ def find_best_lambda_reg_logistic_regression(tx, y, initial_w, k_fold, lambdas):
 
     cross_validation_visualization(lambdas, rmse_tr, rmse_te)
     print(
-        " the choice of lambda which leads to the best test rmse is %.5f with a test rmse of %.3f"
+        " the choice of lambda which leads to the best test rmse is %.9f with a test rmse of %.3f"
         % (best_lambda, best_rmse)
     )
     return best_lambda, best_rmse
