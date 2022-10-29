@@ -506,7 +506,7 @@ def learning_by_logistic_gradient_descent(y, tx, w, gamma):
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    threshold = 1e-5
+    threshold = 1e-7
     losses = []
 
     w = initial_w

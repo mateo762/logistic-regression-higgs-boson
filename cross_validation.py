@@ -153,7 +153,7 @@ def cross_validation_logistic_regression(y, tx, initial_w, k_indices, k):
 
 
     w, loss_tr = logistic_regression(
-        train_y, train_tx, initial_w, 5000, 1e-6
+        train_y, train_tx, initial_w, 10000, 0.0001
     )
 
     # rr_test = ridge_regression(test_y, poly_test, lambda_)
@@ -262,15 +262,15 @@ def cross_validation_reg_logistic_regression(y, tx, initial_w, k_indices, k, lam
     """
     train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
 
-    w, loss_tr = reg_logistic_regression(train_y, train_tx, lambda_, initial_w, 1000, 0.0001)
+    w, loss_tr = reg_logistic_regression(train_y, train_tx, lambda_, initial_w, 100000, 0.000001)
 
     # rr_test = ridge_regression(test_y, poly_test, lambda_)
 
     loss_te = calculate_logistic_loss(test_y, test_tx, w)# + lambda_ * np.dot(w.T, w)
 
-    loss_tr = np.sqrt(2 * loss_tr)# + lambda_ * np.dot(w.T, w)
+    #loss_tr = np.sqrt(2 * loss_tr)# + lambda_ * np.dot(w.T, w)
 
-    loss_te = np.sqrt(2 * loss_te)# + lambda_ * np.dot(w.T, w)
+    #loss_te = np.sqrt(2 * loss_te)# + lambda_ * np.dot(w.T, w)
 
     return loss_tr, loss_te
 
