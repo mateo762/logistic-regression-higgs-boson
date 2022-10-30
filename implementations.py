@@ -527,8 +527,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         #   print("Current iteration={i}, the loss={l}".format(i=iter, l=loss))
 
         # converge criterion
-        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-           break
+        #if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+         #  break
     # visualization
     # visualization(y, x, mean_x, std_x, w, "classification_by_logistic_regression_newton_method", True)
     # print("loss={l}".format(l=calculate_loss(y, tx, w)))
