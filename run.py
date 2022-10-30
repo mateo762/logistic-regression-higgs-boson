@@ -1,12 +1,10 @@
 # Useful starting lines
-%matplotlib inline
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 from scipy import stats
-%load_ext autoreload
-%autoreload 2
+
 from implementations_tanguy import *
 
 from helpers import *
