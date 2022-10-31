@@ -18,5 +18,5 @@ Files Description:
 
 How to: 
 
-Simply run the ```run.py``` in the cloned repository, making sure that the ```data``` folder sits in the folder of the ```run.py```. This will create a ```submission.csv``` in the ```data``` folder.
+Simply run the ```run.py``` in the cloned repository, making sure that the ```data``` folder sits in the folder of the ```run.py```. Make sure to add ```test.csv``` in the ```data``` folder. This will create a ```submission.csv``` in the ```data``` folder.
 Note that it takes a few minutes to generate the file (2-3 minutes)
