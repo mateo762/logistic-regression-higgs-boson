@@ -1,4 +1,7 @@
+# ML Project 1 
 
+### A New Regularized Logistic Regression Method to detect Higgs Boson production
+This project aims to find the best classification model to detect Higgs Boson decay signatures in a dataset of collisition decay signatures.
 
 Files Description:
 
@@ -8,8 +11,8 @@ Files Description:
 4. ```cross_validation.py``` Cross-validation functions. Cross-validation is used to compute the loss and the accuracy of model prediction on unknown data. Different variants of cross-validation are implemented, including functions to find the best value of a particular parameter for a given training technique. 
 5. ```run.py``` Python script to generate the ```submission.csv``` of the predictions made on the test set, ```test.csv```.
 6. ```Project1_new.ipynb``` Notebook to keep trace of our research, includes among others different runs of cross_validations, the methods to visualize the train dataset. This is interesting to look if one is interested in the way the data figures on the report are made.
-7. ```data/train.csv``` Train dataset with known classifications.
-8. ```data/test.csv``` Test dataset with unknown classifications.
+7. ```data/train.csv``` Train dataset with known classifications. 
+8. ```data/test.csv``` Test dataset with unknown classifications. This file is initially not present, please put it there.
 8. ```data/sample-submission.csv``` Example of a submission file.
 
 
