@@ -31,10 +31,6 @@ def cross_validation_visualization_gamma(lambds, rmse_tr, rmse_te):
     plt.savefig("cross_validation")
 
 
-
-
-
-
 def cross_validation_least_squares(y, tx, k_indices, k):
     """return the losses of least squares for a fold corresponding to k_indices
 
@@ -208,9 +204,7 @@ def cross_validation_logistic_regression_polynomial_exp_full(y, tx, degree, k_fo
         test_exp_tx = build_poly(test_tx, degree)
 
         # compute train weight and train loss
-        w, loss_tr = logistic_regression(
-            train_y, train_exp_tx, initial_w, 1000, 0.02
-        )
+        w, loss_tr = logistic_regression(train_y, train_exp_tx, initial_w, 1000, 0.02)
 
         # compute test loss
         loss_te = calculate_logistic_loss(test_y, test_exp_tx, w)
