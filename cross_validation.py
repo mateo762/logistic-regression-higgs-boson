@@ -1,5 +1,6 @@
 import numpy as np
 from helpers import *
+from utils import *
 import matplotlib.pyplot as plt
 from implementations import *
 
@@ -30,94 +31,8 @@ def cross_validation_visualization_gamma(lambds, rmse_tr, rmse_te):
     plt.savefig("cross_validation")
 
 
-def build_k_indices(y, k_fold, seed):
-    """build k indices for k-fold.
-
-    Args:
-        y:      shape=(N,)
-        k_fold: K in K-fold, i.e. the fold num
-        seed:   the random seed
-
-    Returns:
-        A 2D array of shape=(k_fold, N/k_fold) that indicates the data indices for each fold
-
-    >>> build_k_indices(np.array([1., 2., 3., 4.]), 2, 1)
-    array([[3, 2],
-           [0, 1]])
-    """
-    num_row = y.shape[0]
-    interval = int(num_row / k_fold)
-    np.random.seed(seed)
-    indices = np.random.permutation(num_row)
-    k_indices = [indices[k * interval : (k + 1) * interval] for k in range(k_fold)]
-    return np.array(k_indices)
 
 
-def accuracy_logistic(tx, y, w):
-    """Computes the accuracy of weights w given test predictions y and samples tx
-    for a classification problem of y in {0,1}.
-
-    Args:
-        y:      shape=(N,)
-        tx:     shape=(N,D)
-        w:      shape=(D,)
-
-    Returns:
-        The accuracy a the number of correct predictions divided by the number
-        of predictions
-    """
-    local_predictions = tx @ w
-
-    # If a value x is negative, applying the sigmoid will give a probability
-    # smaller than 0.5, hence a 0 prediction. Otherwise, it's a 1 prediction
-    local_predictions = [0 if i < 0 else 1 for i in local_predictions.T[0]]
-
-    N = len(y)
-    # Get the accuracy
-    accuracy = (N - sum(abs(local_predictions - y))) / N
-
-    return accuracy
-
-
-def separate_data(tx, y, k_indices, k):
-    """return the kth fold separated data for cross validation
-    Args:
-        y:          shape=(N,)
-        tx:         shape=(N,D)
-        k_indices:  2D array returned by build_k_indices()
-        k:          scalar, the k-th fold (N.B.: not to confused with k_fold which is the fold nums)
-
-
-    Returns:
-        the separated data, train_tx, train_y, test_tx, test_y.
-
-
-    """
-
-    # separates data between train and test sets using k folds and k indices
-    # the test samples are the kth group
-    test_indices = k_indices[k]
-
-    train_indices_not_flat = []
-
-    # add all groups of indices in the list
-    for i in range(len(k_indices)):
-        if i != k:
-            train_indices_not_flat.append(k_indices[i])
-
-    # flatten the indices
-    train_indices_flat = [e for sl in train_indices_not_flat for e in sl]
-
-    # construct the matrices by selecting elements thanks to the different indices lists
-    test_tx = np.array([tx[i] for i in test_indices])
-
-    test_y = np.array([y[i] for i in test_indices])
-
-    train_tx = np.array([tx[i] for i in train_indices_flat])
-
-    train_y = np.array([y[i] for i in train_indices_flat])
-
-    return train_tx, train_y, test_tx, test_y
 
 
 def cross_validation_least_squares(y, tx, k_indices, k):
@@ -201,7 +116,7 @@ def cross_validation_logistic_regression(y, tx, initial_w, k_indices, k):
     for i in range(10):
         # separate data
         train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
-        w, loss_tr = logistic_regression(train_y, train_tx, initial_w, 1000, 0.00001)
+        w, loss_tr = logistic_regression(train_y, train_tx, initial_w, 1000, 0.02)
         loss_te = calculate_logistic_loss(test_y, test_tx, w)
         accuracies.append(accuracy_logistic(test_tx, test_y[:, 0], w))
         losses.append(loss_te)
@@ -242,7 +157,7 @@ def cross_validation_logistic_regression_full(y, tx, initial_w, k_fold):
         train_tx, train_y, test_tx, test_y = separate_data(tx, y, k_indices, k)
 
         # compute train weight and train loss
-        w, loss_tr = logistic_regression(train_y, train_tx, initial_w, 1000, 0.000002)
+        w, loss_tr = logistic_regression(train_y, train_tx, initial_w, 1000, 0.02)
         # compute test loss
         loss_te = calculate_logistic_loss(test_y, test_tx, w)
 
@@ -294,7 +209,7 @@ def cross_validation_logistic_regression_polynomial_exp_full(y, tx, degree, k_fo
 
         # compute train weight and train loss
         w, loss_tr = logistic_regression(
-            train_y, train_exp_tx, initial_w, 1000, 0.000002
+            train_y, train_exp_tx, initial_w, 1000, 0.02
         )
 
         # compute test loss
@@ -412,7 +327,7 @@ def cross_validation_reg_logistic_regression_exp(
     test_exp_tx = build_poly(test_tx, degree)
 
     w, loss_tr = reg_logistic_regression(
-        train_y, train_exp_tx, lambda_, initial_w, 1000, 0.000002
+        train_y, train_exp_tx, lambda_, initial_w, 10000, 0.02
     )
 
     loss_te = calculate_logistic_loss(

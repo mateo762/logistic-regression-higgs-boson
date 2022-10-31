@@ -1,6 +1,6 @@
 import numpy as np
 import random
-
+from utils import *
 
 """ LINEAR REGRESSION USING GRADIENT DESCENT"""
 #############################################
@@ -272,6 +272,7 @@ def calculate_logistic_loss(y, tx, w):
     >>> round(calculate_loss(y, tx, w), 8)
     1.52429481
     """
+
     assert y.shape[0] == tx.shape[0]
     assert tx.shape[1] == w.shape[0]
 
@@ -508,6 +509,7 @@ def learning_by_penalized_logistic_gradient_descent(y, tx, w, lambda_, gamma):
     """
 
     # Compute the gradient
+
     gradient = calculate_logistic_gradient(y, tx, w) + 2 * lambda_ * w
 
     # Compute the new weights
@@ -540,15 +542,14 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         w: shape=(D, 1)
 
     """
-    threshold = 1e-6
+    threshold = 1e-8
     losses = []
     w = initial_w
     loss = (
         calculate_logistic_loss(y, tx, initial_w)
         + ((lambda_) * np.dot(initial_w.T, initial_w))[0][0]
     )
-    # if(max_iters == 0):
-    # 	loss = calculate_logistic_loss(y, tx, w) + (lambda_ * np.dot(w.T, w))[0][0]
+
     # start the logistic regression
     for iter in range(max_iters):
 
