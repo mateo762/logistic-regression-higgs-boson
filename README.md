@@ -1,6 +1,9 @@
 # ML Project 1 
 
 ### A New Regularized Logistic Regression Method to detect Higgs Boson production
+You can read the report [here](https://mateo762.github.io/reports/ReportHiggs.pdf).
+
+
 This project aims to find the best classification model to detect Higgs Boson decay signatures in a dataset of collisition decay signatures.
 
 Files Description:
